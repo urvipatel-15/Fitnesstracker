@@ -1,0 +1,1245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Personal Fitness & Wellness Planner</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .nav-tabs {
+            display: flex;
+            background: #f8f9fa;
+            border-bottom: 2px solid #e9ecef;
+        }
+
+        .nav-tab {
+            flex: 1;
+            padding: 20px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            color: #6c757d;
+            transition: all 0.3s ease;
+        }
+
+        .nav-tab.active {
+            background: white;
+            color: #4facfe;
+            border-bottom: 3px solid #4facfe;
+        }
+
+        .nav-tab:hover {
+            background: #e9ecef;
+        }
+
+        .content {
+            padding: 30px;
+        }
+
+        .section {
+            display: none;
+        }
+
+        .section.active {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: #4facfe;
+            box-shadow: 0 0 0 3px rgba(79, 172, 254, 0.1);
+        }
+
+        .checkbox-group {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 10px;
+        }
+
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .checkbox-item:hover {
+            background: #f8f9fa;
+        }
+
+        .checkbox-item.selected {
+            background: #e3f2fd;
+            border-color: #4facfe;
+            color: #1976d2;
+        }
+
+        .checkbox-item input {
+            margin-right: 10px;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(79, 172, 254, 0.3);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .plan-section {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 15px;
+            margin-bottom: 25px;
+        }
+
+        .plan-section h3 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 1.4rem;
+        }
+
+        .workout-day {
+            background: white;
+            padding: 20px;
+            margin-bottom: 15px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+        }
+
+        .workout-day h4 {
+            color: #4facfe;
+            margin-bottom: 12px;
+            font-size: 1.2rem;
+        }
+
+        .exercise-list {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .exercise-list li {
+            padding: 8px 0;
+            border-bottom: 1px solid #e9ecef;
+            position: relative;
+            padding-left: 25px;
+        }
+
+        .exercise-list li:before {
+            content: "→";
+            position: absolute;
+            left: 0;
+            color: #4facfe;
+            font-weight: bold;
+        }
+
+        .exercise-list li:last-child {
+            border-bottom: none;
+        }
+
+        .nutrition-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .meal-card {
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+            border-left: 5px solid #4facfe;
+        }
+
+        .meal-card h4 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 1.3rem;
+        }
+
+        .meal-options {
+            list-style: none;
+        }
+
+        .meal-options li {
+            padding: 8px 0;
+            color: #666;
+            position: relative;
+            padding-left: 20px;
+        }
+
+        .meal-options li:before {
+            content: "🍽️";
+            position: absolute;
+            left: 0;
+        }
+
+        .health-profile {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 15px;
+            margin-bottom: 25px;
+        }
+
+        .health-profile h3 {
+            margin-bottom: 15px;
+            font-size: 1.4rem;
+        }
+
+        .profile-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .stat-item {
+            background: rgba(255,255,255,0.1);
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            display: block;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 20px;
+            background: #e9ecef;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            border-radius: 10px;
+            transition: width 0.5s ease;
+        }
+
+        .error-message {
+            background: #fee;
+            color: #c33;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border-left: 4px solid #c33;
+        }
+
+        .success-message {
+            background: #efe;
+            color: #3c3;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border-left: 4px solid #3c3;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                margin: 10px;
+                border-radius: 15px;
+            }
+
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .nav-tabs {
+                flex-direction: column;
+            }
+
+            .checkbox-group {
+                grid-template-columns: 1fr;
+            }
+
+            .nutrition-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🏃‍♀️ Personal Fitness & Wellness Planner</h1>
+            <p>Your personalized journey to better health and fitness</p>
+        </div>
+
+        <div class="nav-tabs">
+            <button class="nav-tab active" onclick="showSection('profile')">👤 Profile Setup</button>
+            <button class="nav-tab" onclick="showSection('workout')">💪 Workout Plan</button>
+            <button class="nav-tab" onclick="showSection('nutrition')">🥗 Nutrition Plan</button>
+            <button class="nav-tab" onclick="showSection('dashboard')">📊 Dashboard</button>
+        </div>
+
+        <div class="content">
+            <!-- Profile Setup Section -->
+            <div id="profile" class="section active">
+                <h2>Personal Health Profile</h2>
+                <div id="profile-error" class="error-message" style="display: none;"></div>
+                
+                <div class="form-group">
+                    <label for="age">Age</label>
+                    <input type="number" id="age" class="form-control" placeholder="Enter your age" min="10" max="100">
+                </div>
+
+                <div class="form-group">
+                    <label for="weight">Weight (kg)</label>
+                    <input type="number" id="weight" class="form-control" placeholder="Enter your weight" min="30" max="200">
+                </div>
+
+                <div class="form-group">
+                    <label for="height">Height (cm)</label>
+                    <input type="number" id="height" class="form-control" placeholder="Enter your height" min="120" max="220">
+                </div>
+
+                <div class="form-group">
+                    <label for="gender">Gender</label>
+                    <select id="gender" class="form-control">
+                        <option value="">Select gender</option>
+                        <option value="female">Female</option>
+                        <option value="male">Male</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="fitness-level">Fitness Level</label>
+                    <select id="fitness-level" class="form-control">
+                        <option value="">Select fitness level</option>
+                        <option value="beginner">Beginner</option>
+                        <option value="intermediate">Intermediate</option>
+                        <option value="advanced">Advanced</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="lifestyle">Lifestyle</label>
+                    <select id="lifestyle" class="form-control">
+                        <option value="">Select lifestyle</option>
+                        <option value="sedentary">Sedentary (office job, little exercise)</option>
+                        <option value="lightly-active">Lightly Active (light exercise 1-3 days/week)</option>
+                        <option value="moderately-active">Moderately Active (moderate exercise 3-5 days/week)</option>
+                        <option value="very-active">Very Active (heavy exercise 6-7 days/week)</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Fitness Goals (Select multiple)</label>
+                    <div class="checkbox-group" id="goals-group">
+                        <div class="checkbox-item" data-value="weight-loss">
+                            <input type="checkbox" id="goal-weight-loss">
+                            <label for="goal-weight-loss">Weight Loss</label>
+                        </div>
+                        <div class="checkbox-item" data-value="muscle-gain">
+                            <input type="checkbox" id="goal-muscle-gain">
+                            <label for="goal-muscle-gain">Muscle Gain</label>
+                        </div>
+                        <div class="checkbox-item" data-value="strength">
+                            <input type="checkbox" id="goal-strength">
+                            <label for="goal-strength">Strength Building</label>
+                        </div>
+                        <div class="checkbox-item" data-value="mental-wellness">
+                            <input type="checkbox" id="goal-mental-wellness">
+                            <label for="goal-mental-wellness">Mental Wellness</label>
+                        </div>
+                        <div class="checkbox-item" data-value="flexibility">
+                            <input type="checkbox" id="goal-flexibility">
+                            <label for="goal-flexibility">Flexibility</label>
+                        </div>
+                        <div class="checkbox-item" data-value="endurance">
+                            <input type="checkbox" id="goal-endurance">
+                            <label for="goal-endurance">Endurance</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Medical Conditions (Select if applicable)</label>
+                    <div class="checkbox-group" id="conditions-group">
+                        <div class="checkbox-item" data-value="diabetes">
+                            <input type="checkbox" id="condition-diabetes">
+                            <label for="condition-diabetes">Diabetes</label>
+                        </div>
+                        <div class="checkbox-item" data-value="hypertension">
+                            <input type="checkbox" id="condition-hypertension">
+                            <label for="condition-hypertension">Hypertension</label>
+                        </div>
+                        <div class="checkbox-item" data-value="asthma">
+                            <input type="checkbox" id="condition-asthma">
+                            <label for="condition-asthma">Asthma</label>
+                        </div>
+                        <div class="checkbox-item" data-value="joint-issues">
+                            <input type="checkbox" id="condition-joint-issues">
+                            <label for="condition-joint-issues">Joint Issues</label>
+                        </div>
+                        <div class="checkbox-item" data-value="back-problems">
+                            <input type="checkbox" id="condition-back-problems">
+                            <label for="condition-back-problems">Back Problems</label>
+                        </div>
+                        <div class="checkbox-item" data-value="none">
+                            <input type="checkbox" id="condition-none">
+                            <label for="condition-none">None</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Food Allergies (Select if applicable)</label>
+                    <div class="checkbox-group" id="allergies-group">
+                        <div class="checkbox-item" data-value="dairy">
+                            <input type="checkbox" id="allergy-dairy">
+                            <label for="allergy-dairy">Dairy</label>
+                        </div>
+                        <div class="checkbox-item" data-value="gluten">
+                            <input type="checkbox" id="allergy-gluten">
+                            <label for="allergy-gluten">Gluten</label>
+                        </div>
+                        <div class="checkbox-item" data-value="nuts">
+                            <input type="checkbox" id="allergy-nuts">
+                            <label for="allergy-nuts">Nuts</label>
+                        </div>
+                        <div class="checkbox-item" data-value="seafood">
+                            <input type="checkbox" id="allergy-seafood">
+                            <label for="allergy-seafood">Seafood</label>
+                        </div>
+                        <div class="checkbox-item" data-value="eggs">
+                            <input type="checkbox" id="allergy-eggs">
+                            <label for="allergy-eggs">Eggs</label>
+                        </div>
+                        <div class="checkbox-item" data-value="none">
+                            <input type="checkbox" id="allergy-none">
+                            <label for="allergy-none">None</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="cultural-prefs">Cultural/Dietary Preferences</label>
+                    <select id="cultural-prefs" class="form-control">
+                        <option value="">Select preference</option>
+                        <option value="vegetarian">Vegetarian</option>
+                        <option value="vegan">Vegan</option>
+                        <option value="indian">Indian Cuisine</option>
+                        <option value="mediterranean">Mediterranean</option>
+                        <option value="asian">Asian Cuisine</option>
+                        <option value="western">Western</option>
+                        <option value="no-preference">No Preference</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="workout-location">Preferred Workout Location</label>
+                    <select id="workout-location" class="form-control">
+                        <option value="">Select location</option>
+                        <option value="home">Home</option>
+                        <option value="gym">Gym</option>
+                        <option value="outdoor">Outdoor</option>
+                        <option value="both">Both Home & Gym</option>
+                    </select>
+                </div>
+
+                <button class="btn" onclick="generatePlans()">🚀 Generate My Personalized Plans</button>
+            </div>
+
+            <!-- Workout Plan Section -->
+            <div id="workout" class="section">
+                <h2>Your Personalized Workout Plan</h2>
+                <div id="workout-content">
+                    <p>Please complete your profile first to generate a workout plan.</p>
+                </div>
+            </div>
+
+            <!-- Nutrition Plan Section -->
+            <div id="nutrition" class="section">
+                <h2>Your Personalized Nutrition Plan</h2>
+                <div id="nutrition-content">
+                    <p>Please complete your profile first to generate a nutrition plan.</p>
+                </div>
+            </div>
+
+            <!-- Dashboard Section -->
+            <div id="dashboard" class="section">
+                <h2>Health Dashboard</h2>
+                <div id="dashboard-content">
+                    <p>Complete your profile and generate plans to view your dashboard.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let userProfile = {};
+        let workoutPlan = null;
+        let nutritionPlan = null;
+
+        // Workout databases
+        const workoutDatabase = {
+            beginner: {
+                strength: [
+                    'Push-ups (modified): 2 sets of 8-12 reps',
+                    'Bodyweight squats: 2 sets of 10-15 reps',
+                    'Plank: 2 sets of 20-30 seconds',
+                    'Wall sits: 2 sets of 15-20 seconds',
+                    'Glute bridges: 2 sets of 10-15 reps',
+                    'Leg raises: 2 sets of 8-10 reps'
+                ],
+                cardio: [
+                    'Walking: 20-30 minutes',
+                    'Dancing: 15-20 minutes',
+                    'Step-ups: 2 sets of 10 per leg',
+                    'Marching in place: 5 minutes',
+                    'Light jogging: 10-15 minutes'
+                ],
+                flexibility: [
+                    'Child\'s pose: Hold for 30 seconds',
+                    'Cat-cow stretch: 10 repetitions',
+                    'Seated spinal twist: 30 seconds each side',
+                    'Shoulder rolls: 10 forward, 10 backward',
+                    'Gentle neck stretches: 30 seconds each direction'
+                ],
+                yoga: [
+                    'Mountain pose: Hold for 1 minute',
+                    'Tree pose: 30 seconds each leg',
+                    'Warrior I: 45 seconds each side',
+                    'Downward dog (modified): 30 seconds',
+                    'Corpse pose: 5 minutes'
+                ]
+            },
+            intermediate: {
+                strength: [
+                    'Push-ups: 3 sets of 12-18 reps',
+                    'Squats: 3 sets of 15-20 reps',
+                    'Plank: 3 sets of 45-60 seconds',
+                    'Lunges: 3 sets of 12 per leg',
+                    'Mountain climbers: 3 sets of 20 reps',
+                    'Burpees: 2 sets of 8-10 reps'
+                ],
+                cardio: [
+                    'HIIT training: 20 minutes',
+                    'Jogging: 25-35 minutes',
+                    'Cycling: 30-40 minutes',
+                    'Jump rope: 3 sets of 1 minute',
+                    'Swimming: 20-30 minutes'
+                ],
+                flexibility: [
+                    'Warrior poses: Hold 45 seconds each',
+                    'Downward dog: Hold 1 minute',
+                    'Pigeon pose: 45 seconds each side',
+                    'Sun salutations: 5 rounds',
+                    'Seated forward fold: 1 minute'
+                ],
+                yoga: [
+                    'Vinyasa flow: 20 minutes',
+                    'Warrior II: 1 minute each side',
+                    'Triangle pose: 45 seconds each side',
+                    'Chair pose: 45 seconds',
+                    'Bridge pose: 45 seconds'
+                ]
+            },
+            advanced: {
+                strength: [
+                    'Push-up variations: 4 sets of 20+ reps',
+                    'Jump squats: 4 sets of 15-20 reps',
+                    'Plank variations: 4 sets of 1+ minutes',
+                    'Burpees: 3 sets of 15-20 reps',
+                    'Single-leg deadlifts: 3 sets of 12 per leg',
+                    'Pike push-ups: 3 sets of 10-15 reps'
+                ],
+                cardio: [
+                    'Advanced HIIT: 30-40 minutes',
+                    'Running: 45+ minutes',
+                    'Circuit training: 40 minutes',
+                    'Plyometric exercises: 25 minutes',
+                    'Interval running: 30 minutes'
+                ],
+                flexibility: [
+                    'Advanced yoga flow: 30-45 minutes',
+                    'Deep stretching routine: 25 minutes',
+                    'Balance poses: Hold 1+ minutes',
+                    'Full body mobility: 30 minutes',
+                    'Advanced hip openers: 20 minutes'
+                ],
+                yoga: [
+                    'Power yoga: 45 minutes',
+                    'Arm balances: 5 poses, 30 seconds each',
+                    'Advanced sun salutations: 10 rounds',
+                    'Inversions practice: 15 minutes',
+                    'Deep meditation: 15 minutes'
+                ]
+            }
+        };
+
+        // Nutrition database
+        const nutritionDatabase = {
+            'weight-loss': {
+                breakfast: [
+                    'Greek yogurt with berries and almonds',
+                    'Oatmeal with cinnamon and apple slices',
+                    'Vegetable omelet with herbs',
+                    'Smoothie with spinach, banana, and protein powder'
+                ],
+                lunch: [
+                    'Grilled chicken salad with mixed greens',
+                    'Quinoa bowl with roasted vegetables',
+                    'Lentil soup with side salad',
+                    'Fish tacos with cabbage slaw'
+                ],
+                dinner: [
+                    'Baked salmon with steamed broccoli',
+                    'Turkey meatballs with zucchini noodles',
+                    'Grilled tofu with stir-fried vegetables',
+                    'Lean beef with roasted Brussels sprouts'
+                ],
+                snacks: [
+                    'Apple slices with almond butter',
+                    'Carrot sticks with hummus',
+                    'A small handful of mixed nuts',
+                    'Greek yogurt with cucumber'
+                ]
+            },
+            'muscle-gain': {
+                breakfast: [
+                    'Protein pancakes with banana',
+                    'Scrambled eggs with whole grain toast',
+                    'Protein smoothie with oats and berries',
+                    'Greek yogurt parfait with granola'
+                ],
+                lunch: [
+                    'Grilled chicken with quinoa and avocado',
+                    'Tuna salad with chickpeas',
+                    'Beef and vegetable stir-fry with rice',
+                    'Salmon with sweet potato and green beans'
+                ],
+                dinner: [
+                    'Lean steak with baked potato',
+                    'Grilled chicken thighs with rice',
+                    'Fish with pasta and vegetables',
+                    'Turkey chili with beans'
+                ],
+                snacks: [
+                    'Protein bar with milk',
+                    'Trail mix with dried fruit',
+                    'Cottage cheese with fruit',
+                    'Peanut butter sandwich'
+                ]
+            },
+            'general': {
+                breakfast: [
+                    'Whole grain cereal with milk and fruit',
+                    'Avocado toast with tomatoes',
+                    'Yogurt bowl with granola',
+                    'Green smoothie with spinach and mango'
+                ],
+                lunch: [
+                    'Mediterranean salad with feta',
+                    'Vegetable wrap with hummus',
+                    'Soup and sandwich combo',
+                    'Rice bowl with vegetables and protein'
+                ],
+                dinner: [
+                    'Baked chicken with roasted vegetables',
+                    'Fish with quinoa pilaf',
+                    'Vegetable curry with rice',
+                    'Pasta with marinara and vegetables'
+                ],
+                snacks: [
+                    'Fresh fruit and nuts',
+                    'Vegetable sticks with dip',
+                    'Whole grain crackers with cheese',
+                    'Smoothie with protein'
+                ]
+            }
+        };
+
+        // Cultural cuisine modifications
+        const culturalModifications = {
+            indian: {
+                breakfast: ['Poha with vegetables', 'Upma with curry leaves', 'Idli with sambar', 'Paratha with yogurt'],
+                lunch: ['Dal rice with vegetables', 'Rajma with roti', 'Palak paneer with rice', 'Chole with bhature'],
+                dinner: ['Khichdi with ghee', 'Vegetable curry with chapati', 'Fish curry with rice', 'Paneer tikka with salad'],
+                snacks: ['Roasted chana', 'Fruit chaat', 'Buttermilk', 'Sprouts salad']
+            },
+            mediterranean: {
+                breakfast: ['Greek yogurt with honey and nuts', 'Feta cheese omelet', 'Avocado toast with tomatoes', 'Fresh fruit with yogurt'],
+                lunch: ['Greek salad with olive oil', 'Hummus with vegetables', 'Grilled fish with lemon', 'Quinoa tabbouleh'],
+                dinner: ['Baked salmon with herbs', 'Grilled vegetables with feta', 'Chicken souvlaki', 'Lentil soup with bread'],
+                snacks: ['Olives and cheese', 'Nuts and dried fruits', 'Greek yogurt', 'Fresh vegetables with tzatziki']
+            }
+        };
+
+        function showSection(sectionName) {
+            // Hide all sections
+            const sections = document.querySelectorAll('.section');
+            sections.forEach(section => section.classList.remove('active'));
+            
+            // Hide all nav tabs active state
+            const tabs = document.querySelectorAll('.nav-tab');
+            tabs.forEach(tab => tab.classList.remove('active'));
+            
+            // Show selected section
+            document.getElementById(sectionName).classList.add('active');
+            
+            // Activate corresponding tab
+            event.target.classList.add('active');
+        }
+
+        function setupCheckboxGroups() {
+            const groups = ['goals-group', 'conditions-group', 'allergies-group'];
+            
+            groups.forEach(groupId => {
+                const group = document.getElementById(groupId);
+                const items = group.querySelectorAll('.checkbox-item');
+                
+                items.forEach(item => {
+                    item.addEventListener('click', function() {
+                        const checkbox = this.querySelector('input[type="checkbox"]');
+                        const isNoneOption = checkbox.id.includes('none');
+                        
+                        if (isNoneOption && checkbox.checked) {
+                            // If "None" is selected, uncheck all others
+                            items.forEach(otherItem => {
+                                if (otherItem !== this) {
+                                    otherItem.querySelector('input').checked = false;
+                                    otherItem.classList.remove('selected');
+                                }
+                            });
+                        } else if (!isNoneOption && checkbox.checked) {
+                            // If any other option is selected, uncheck "None"
+                            const noneItem = group.querySelector('[data-value="none"]');
+                            if (noneItem) {
+                                noneItem.querySelector('input').checked = false;
+                                noneItem.classList.remove('selected');
+                            }
+                        }
+                        
+                        this.classList.toggle('selected', checkbox.checked);
+                    });
+                });
+            });
+        }
+
+        function validateProfile() {
+            const errors = [];
+            
+            const age = document.getElementById('age').value;
+            const weight = document.getElementById('weight').value;
+            const height = document.getElementById('height').value;
+            const gender = document.getElementById('gender').value;
+            const fitnessLevel = document.getElementById('fitness-level').value;
+            const lifestyle = document.getElementById('lifestyle').value;
+            const workoutLocation = document.getElementById('workout-location').value;
+            
+            if (!age || age < 10 || age > 100) {
+                errors.push('Please enter a valid age between 10 and 100');
+            }
+            if (!weight || weight < 30 || weight > 200) {
+                errors.push('Please enter a valid weight between 30 and 200 kg');
+            }
+            if (!height || height < 120 || height > 220) {
+                errors.push('Please enter a valid height between 120 and 220 cm');
+            }
+            if (!gender) {
+                errors.push('Please select your gender');
+            }
+            if (!fitnessLevel) {
+                errors.push('Please select your fitness level');
+            }
+            if (!lifestyle) {
+                errors.push('Please select your lifestyle');
+            }
+            if (!workoutLocation) {
+                errors.push('Please select your preferred workout location');
+            }
+            
+            // Check if at least one goal is selected
+            const goalCheckboxes = document.querySelectorAll('#goals-group input[type="checkbox"]:checked');
+            if (goalCheckboxes.length === 0) {
+                errors.push('Please select at least one fitness goal');
+            }
+            
+            return errors;
+        }
+
+        function collectUserData() {
+            userProfile = {
+                age: parseInt(document.getElementById('age').value),
+                weight: parseFloat(document.getElementById('weight').value),
+                height: parseFloat(document.getElementById('height').value),
+                gender: document.getElementById('gender').value,
+                fitnessLevel: document.getElementById('fitness-level').value,
+                lifestyle: document.getElementById('lifestyle').value,
+                workoutLocation: document.getElementById('workout-location').value,
+                culturalPrefs: document.getElementById('cultural-prefs').value,
+                goals: Array.from(document.querySelectorAll('#goals-group input[type="checkbox"]:checked')).map(cb => cb.id.replace('goal-', '')),
+                conditions: Array.from(document.querySelectorAll('#conditions-group input[type="checkbox"]:checked')).map(cb => cb.id.replace('condition-', '')),
+                allergies: Array.from(document.querySelectorAll('#allergies-group input[type="checkbox"]:checked')).map(cb => cb.id.replace('allergy-', ''))
+            };
+            
+            // Calculate BMI
+            const heightInMeters = userProfile.height / 100;
+            userProfile.bmi = (userProfile.weight / (heightInMeters * heightInMeters)).toFixed(1);
+        }
+
+        function generateWorkoutPlan() {
+            const level = userProfile.fitnessLevel;
+            const workouts = workoutDatabase[level];
+            const goals = userProfile.goals;
+            const isWomanFocused = userProfile.gender === 'female';
+            
+            const weeklyPlan = {
+                'Monday': { type: 'Strength Training', exercises: [] },
+                'Tuesday': { type: 'Cardio', exercises: [] },
+                'Wednesday': { type: 'Flexibility/Yoga', exercises: [] },
+                'Thursday': { type: 'Strength Training', exercises: [] },
+                'Friday': { type: 'Cardio', exercises: [] },
+                'Saturday': { type: 'Mixed/Active Recovery', exercises: [] },
+                'Sunday': { type: 'Rest/Light Yoga', exercises: [] }
+            };
+            
+            // Customize based on goals
+            if (goals.includes('weight-loss')) {
+                weeklyPlan['Monday'].exercises = [...workouts.strength.slice(0, 4), ...workouts.cardio.slice(0, 2)];
+                weeklyPlan['Tuesday'].exercises = workouts.cardio;
+                weeklyPlan['Wednesday'].exercises = workouts.flexibility;
+                weeklyPlan['Thursday'].exercises = [...workouts.strength.slice(2, 6), ...workouts.cardio.slice(1, 3)];
+                weeklyPlan['Friday'].exercises = workouts.cardio;
+                weeklyPlan['Saturday'].exercises = [...workouts.flexibility.slice(0, 3), ...workouts.cardio.slice(0, 2)];
+                weeklyPlan['Sunday'].exercises = ['Gentle yoga: 20 minutes', 'Walking: 20 minutes', 'Meditation: 10 minutes'];
+            } else if (goals.includes('muscle-gain')) {
+                weeklyPlan['Monday'].exercises = workouts.strength;
+                weeklyPlan['Tuesday'].exercises = [...workouts.strength.slice(3, 6), ...workouts.cardio.slice(0, 2)];
+                weeklyPlan['Wednesday'].exercises = workouts.flexibility;
+                weeklyPlan['Thursday'].exercises = workouts.strength;
+                weeklyPlan['Friday'].exercises = [...workouts.strength.slice(2, 5), ...workouts.cardio.slice(0, 1)];
+                weeklyPlan['Saturday'].exercises = [...workouts.strength.slice(0, 3), ...workouts.flexibility.slice(0, 2)];
+                weeklyPlan['Sunday'].exercises = ['Light stretching: 15 minutes', 'Gentle walk: 20 minutes'];
+            } else {
+                // General fitness
+                weeklyPlan['Monday'].exercises = workouts.strength.slice(0, 4);
+                weeklyPlan['Tuesday'].exercises = workouts.cardio.slice(0, 3);
+                weeklyPlan['Wednesday'].exercises = workouts.flexibility;
+                weeklyPlan['Thursday'].exercises = workouts.strength.slice(2, 6);
+                weeklyPlan['Friday'].exercises = workouts.cardio.slice(1, 4);
+                weeklyPlan['Saturday'].exercises = [...workouts.yoga || workouts.flexibility.slice(0, 3), ...workouts.cardio.slice(0, 1)];
+                weeklyPlan['Sunday'].exercises = ['Gentle yoga: 20 minutes', 'Light walk: 15 minutes', 'Meditation: 10 minutes'];
+            }
+            
+            // Add women-focused exercises if applicable
+            if (isWomanFocused) {
+                const womenFocusedExercises = [
+                    'Pelvic tilts: 2 sets of 10 reps',
+                    'Inner thigh squeezes: 2 sets of 15 reps',
+                    'Goddess pose: Hold for 30 seconds',
+                    'Hip circles: 10 in each direction'
+                ];
+                
+                weeklyPlan['Wednesday'].exercises.push(...womenFocusedExercises.slice(0, 2));
+                weeklyPlan['Saturday'].exercises.push(...womenFocusedExercises.slice(2));
+            }
+            
+            // Modify for medical conditions
+            if (userProfile.conditions.includes('joint-issues') || userProfile.conditions.includes('back-problems')) {
+                Object.keys(weeklyPlan).forEach(day => {
+                    weeklyPlan[day].exercises = weeklyPlan[day].exercises.map(exercise => {
+                        if (exercise.includes('jump') || exercise.includes('burpees')) {
+                            return exercise.replace(/jump|burpees/gi, 'modified low-impact');
+                        }
+                        return exercise;
+                    });
+                });
+            }
+            
+            return weeklyPlan;
+        }
+
+        function generateNutritionPlan() {
+            let basePlan;
+            
+            // Determine primary goal for nutrition
+            if (userProfile.goals.includes('weight-loss')) {
+                basePlan = nutritionDatabase['weight-loss'];
+            } else if (userProfile.goals.includes('muscle-gain')) {
+                basePlan = nutritionDatabase['muscle-gain'];
+            } else {
+                basePlan = nutritionDatabase['general'];
+            }
+            
+            let plan = JSON.parse(JSON.stringify(basePlan)); // Deep copy
+            
+            // Modify based on cultural preferences
+            if (userProfile.culturalPrefs && culturalModifications[userProfile.culturalPrefs]) {
+                const culturalPlan = culturalModifications[userProfile.culturalPrefs];
+                Object.keys(culturalPlan).forEach(meal => {
+                    plan[meal] = [...culturalPlan[meal], ...plan[meal].slice(2)];
+                });
+            }
+            
+            // Remove items based on allergies
+            if (!userProfile.allergies.includes('none')) {
+                Object.keys(plan).forEach(meal => {
+                    plan[meal] = plan[meal].filter(item => {
+                        const lowerItem = item.toLowerCase();
+                        return !userProfile.allergies.some(allergy => {
+                            switch(allergy) {
+                                case 'dairy': return lowerItem.includes('milk') || lowerItem.includes('cheese') || lowerItem.includes('yogurt');
+                                case 'gluten': return lowerItem.includes('bread') || lowerItem.includes('pasta') || lowerItem.includes('wheat');
+                                case 'nuts': return lowerItem.includes('nut') || lowerItem.includes('almond');
+                                case 'seafood': return lowerItem.includes('fish') || lowerItem.includes('salmon') || lowerItem.includes('tuna');
+                                case 'eggs': return lowerItem.includes('egg') || lowerItem.includes('omelet');
+                                default: return false;
+                            }
+                        });
+                    });
+                });
+            }
+            
+            // Add supplements/recommendations based on goals
+            plan.supplements = [];
+            if (userProfile.goals.includes('muscle-gain')) {
+                plan.supplements.push('Protein powder (post-workout)', 'Creatine (3-5g daily)');
+            }
+            if (userProfile.goals.includes('weight-loss')) {
+                plan.supplements.push('Green tea extract', 'Multivitamin');
+            }
+            if (userProfile.gender === 'female') {
+                plan.supplements.push('Iron supplement (if needed)', 'Calcium with Vitamin D');
+            }
+            
+            // Hydration recommendations
+            const baseWater = 35; // ml per kg body weight
+            plan.hydration = `Drink ${Math.round(userProfile.weight * baseWater / 1000)} liters of water daily`;
+            
+            return plan;
+        }
+
+        function displayWorkoutPlan() {
+            const content = document.getElementById('workout-content');
+            if (!workoutPlan) {
+                content.innerHTML = '<p>Please generate your personalized plan first.</p>';
+                return;
+            }
+            
+            let html = '<div class="plan-section">';
+            html += '<h3>🏋️‍♀️ Your Weekly Workout Schedule</h3>';
+            html += `<p><strong>Fitness Level:</strong> ${userProfile.fitnessLevel.charAt(0).toUpperCase() + userProfile.fitnessLevel.slice(1)}</p>`;
+            html += `<p><strong>Primary Goals:</strong> ${userProfile.goals.map(g => g.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase())).join(', ')}</p>`;
+            
+            Object.keys(workoutPlan).forEach(day => {
+                const dayPlan = workoutPlan[day];
+                html += `<div class="workout-day">`;
+                html += `<h4>${day} - ${dayPlan.type}</h4>`;
+                html += '<ul class="exercise-list">';
+                dayPlan.exercises.forEach(exercise => {
+                    html += `<li>${exercise}</li>`;
+                });
+                html += '</ul></div>';
+            });
+            
+            html += '</div>';
+            html += '<div class="plan-section">';
+            html += '<h3>💡 Important Notes</h3>';
+            html += '<ul>';
+            html += '<li>Start with lighter intensity and gradually increase</li>';
+            html += '<li>Rest for 30-60 seconds between sets</li>';
+            html += '<li>Stay hydrated throughout your workout</li>';
+            html += '<li>Listen to your body and adjust as needed</li>';
+            if (userProfile.conditions.includes('joint-issues')) {
+                html += '<li>⚠️ Avoid high-impact exercises due to joint issues</li>';
+            }
+            if (userProfile.conditions.includes('asthma')) {
+                html += '<li>⚠️ Keep your inhaler nearby during cardio sessions</li>';
+            }
+            html += '</ul></div>';
+            
+            content.innerHTML = html;
+        }
+
+        function displayNutritionPlan() {
+            const content = document.getElementById('nutrition-content');
+            if (!nutritionPlan) {
+                content.innerHTML = '<p>Please generate your personalized plan first.</p>';
+                return;
+            }
+            
+            let html = '<div class="plan-section">';
+            html += '<h3>🥗 Your Personalized Nutrition Plan</h3>';
+            html += `<p><strong>Primary Goal:</strong> ${userProfile.goals[0] ? userProfile.goals[0].replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase()) : 'General Health'}</p>`;
+            html += `<p><strong>Cultural Preference:</strong> ${userProfile.culturalPrefs || 'General'}</p>`;
+            html += `<p><strong>💧 ${nutritionPlan.hydration}</strong></p>`;
+            html += '</div>';
+            
+            html += '<div class="nutrition-grid">';
+            
+            const meals = ['breakfast', 'lunch', 'dinner', 'snacks'];
+            const mealEmojis = { breakfast: '🌅', lunch: '☀️', dinner: '🌙', snacks: '🍎' };
+            
+            meals.forEach(meal => {
+                html += `<div class="meal-card">`;
+                html += `<h4>${mealEmojis[meal]} ${meal.charAt(0).toUpperCase() + meal.slice(1)}</h4>`;
+                html += '<ul class="meal-options">';
+                nutritionPlan[meal].forEach(option => {
+                    html += `<li>${option}</li>`;
+                });
+                html += '</ul></div>';
+            });
+            
+            html += '</div>';
+            
+            if (nutritionPlan.supplements && nutritionPlan.supplements.length > 0) {
+                html += '<div class="plan-section">';
+                html += '<h3>💊 Recommended Supplements</h3>';
+                html += '<ul>';
+                nutritionPlan.supplements.forEach(supplement => {
+                    html += `<li>${supplement}</li>`;
+                });
+                html += '</ul></div>';
+            }
+            
+            // Allergy warnings
+            if (!userProfile.allergies.includes('none')) {
+                html += '<div class="plan-section">';
+                html += '<h3>⚠️ Allergy Information</h3>';
+                html += `<p>Your plan has been customized to avoid: <strong>${userProfile.allergies.join(', ')}</strong></p>`;
+                html += '<p>Always check food labels and inform restaurants about your allergies.</p>';
+                html += '</div>';
+            }
+            
+            content.innerHTML = html;
+        }
+
+        function displayDashboard() {
+            const content = document.getElementById('dashboard-content');
+            if (!userProfile.age) {
+                content.innerHTML = '<p>Complete your profile first to view your dashboard.</p>';
+                return;
+            }
+            
+            let html = '<div class="health-profile">';
+            html += '<h3>👤 Your Health Profile</h3>';
+            html += '<div class="profile-stats">';
+            html += `<div class="stat-item"><span class="stat-value">${userProfile.age}</span><span class="stat-label">Years Old</span></div>`;
+            html += `<div class="stat-item"><span class="stat-value">${userProfile.weight}</span><span class="stat-label">kg</span></div>`;
+            html += `<div class="stat-item"><span class="stat-value">${userProfile.height}</span><span class="stat-label">cm</span></div>`;
+            html += `<div class="stat-item"><span class="stat-value">${userProfile.bmi}</span><span class="stat-label">BMI</span></div>`;
+            html += '</div></div>';
+            
+            // BMI Status
+            let bmiStatus = '';
+            let bmiColor = '';
+            if (userProfile.bmi < 18.5) {
+                bmiStatus = 'Underweight';
+                bmiColor = '#ffc107';
+            } else if (userProfile.bmi < 25) {
+                bmiStatus = 'Normal';
+                bmiColor = '#28a745';
+            } else if (userProfile.bmi < 30) {
+                bmiStatus = 'Overweight';
+                bmiColor = '#fd7e14';
+            } else {
+                bmiStatus = 'Obese';
+                bmiColor = '#dc3545';
+            }
+            
+            html += '<div class="plan-section">';
+            html += '<h3>📊 Health Metrics</h3>';
+            html += `<p><strong>BMI Status:</strong> <span style="color: ${bmiColor}; font-weight: bold;">${bmiStatus}</span></p>`;
+            
+            // Calculate daily calorie needs (Harris-Benedict equation)
+            let bmr;
+            if (userProfile.gender === 'female') {
+                bmr = 655 + (9.6 * userProfile.weight) + (1.8 * userProfile.height) - (4.7 * userProfile.age);
+            } else {
+                bmr = 66 + (13.7 * userProfile.weight) + (5 * userProfile.height) - (6.8 * userProfile.age);
+            }
+            
+            const activityMultipliers = {
+                'sedentary': 1.2,
+                'lightly-active': 1.375,
+                'moderately-active': 1.55,
+                'very-active': 1.725
+            };
+            
+            const dailyCalories = Math.round(bmr * (activityMultipliers[userProfile.lifestyle] || 1.2));
+            
+            html += `<p><strong>Daily Calorie Needs:</strong> ${dailyCalories} calories</p>`;
+            html += `<p><strong>Fitness Level:</strong> ${userProfile.fitnessLevel.charAt(0).toUpperCase() + userProfile.fitnessLevel.slice(1)}</p>`;
+            html += '</div>';
+            
+            // Goals Progress
+            html += '<div class="plan-section">';
+            html += '<h3>🎯 Your Fitness Goals</h3>';
+            html += '<div class="goals-list">';
+            userProfile.goals.forEach(goal => {
+                const goalName = goal.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase());
+                html += `<div class="goal-item">`;
+                html += `<p><strong>${goalName}</strong></p>`;
+                html += '<div class="progress-bar">';
+                html += '<div class="progress-fill" style="width: 10%;"></div>';
+                html += '</div>';
+                html += '<p style="font-size: 0.9rem; color: #666;">Just getting started!</p>';
+                html += '</div>';
+            });
+            html += '</div></div>';
+            
+            // Health Alerts
+            if (!userProfile.conditions.includes('none')) {
+                html += '<div class="plan-section">';
+                html += '<h3>⚠️ Health Considerations</h3>';
+                html += '<ul>';
+                userProfile.conditions.forEach(condition => {
+                    const conditionName = condition.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase());
+                    html += `<li>Managing: ${conditionName}</li>`;
+                });
+                html += '</ul>';
+                html += '<p><em>Your workout and nutrition plans have been customized accordingly.</em></p>';
+                html += '</div>';
+            }
+            
+            content.innerHTML = html;
+        }
+
+        function generatePlans() {
+            // Clear previous errors
+            document.getElementById('profile-error').style.display = 'none';
+            
+            // Validate profile
+            const errors = validateProfile();
+            if (errors.length > 0) {
+                const errorDiv = document.getElementById('profile-error');
+                errorDiv.innerHTML = errors.join('<br>');
+                errorDiv.style.display = 'block';
+                return;
+            }
+            
+            // Collect user data
+            collectUserData();
+            
+            // Generate plans
+            workoutPlan = generateWorkoutPlan();
+            nutritionPlan = generateNutritionPlan();
+            
+            // Update displays
+            displayWorkoutPlan();
+            displayNutritionPlan();
+            displayDashboard();
+            
+            // Show success message
+            const successDiv = document.createElement('div');
+            successDiv.className = 'success-message';
+            successDiv.innerHTML = '✅ Your personalized fitness and nutrition plans have been generated! Check the Workout Plan and Nutrition Plan tabs.';
+            document.querySelector('.content').insertBefore(successDiv, document.getElementById('profile'));
+            
+            // Remove success message after 5 seconds
+            setTimeout(() => {
+                if (successDiv.parentNode) {
+                    successDiv.parentNode.removeChild(successDiv);
+                }
+            }, 5000);
+        }
+
+        // Initialize the app
+        document.addEventListener('DOMContentLoaded', function() {
+            setupCheckboxGroups();
+        });
+    </script>
+</body>
+</html>
