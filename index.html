@@ -357,6 +357,7 @@
     </style>
 </head>
 <body>
+  <body>
     <div class="container">
         <div class="header">
             <h1>🏃‍♀️ Personal Fitness & Wellness Planner</h1>
@@ -371,11 +372,10 @@
         </div>
 
         <div class="content">
-            <!-- Profile Setup Section -->
             <div id="profile" class="section active">
                 <h2>Personal Health Profile</h2>
                 <div id="profile-error" class="error-message" style="display: none;"></div>
-                
+
                 <div class="form-group">
                     <label for="age">Age</label>
                     <input type="number" id="age" class="form-control" placeholder="Enter your age" min="10" max="100">
@@ -421,6 +421,16 @@
                         <option value="very-active">Very Active (heavy exercise 6-7 days/week)</option>
                     </select>
                 </div>
+<div class="form-group">
+    <label for="workout-location">Workout Location</label>
+    <select id="workout-location" class="form-control">
+        <option value="">Select workout location</option>
+        <option value="home">Home</option>
+        <option value="gym">Gym</option>
+        <option value="outdoor">Outdoor</option>
+    </select>
+</div>
+
 
                 <div class="form-group">
                     <label>Fitness Goals (Select multiple)</label>
@@ -512,41 +522,29 @@
                     </div>
                 </div>
 
-                <div class="form-group">
-                    <label for="cultural-prefs">Cultural/Dietary Preferences</label>
-                    <select id="cultural-prefs" class="form-control">
-                        <option value="">Select preference</option>
-                        <option value="vegetarian">Vegetarian</option>
-                        <option value="vegan">Vegan</option>
-                        <option value="indian">Indian Cuisine</option>
-                        <option value="mediterranean">Mediterranean</option>
-                        <option value="asian">Asian Cuisine</option>
-                        <option value="western">Western</option>
-                        <option value="no-preference">No Preference</option>
-                    </select>
-                </div>
+                <!-- FIXED: Cultural Cuisine Preference (NO vegetarian/vegan here) -->
+<div class="form-group">
+    <label for="cultural-prefs">Cultural Cuisine Preference</label>
+    <select id="cultural-prefs" class="form-control">
+        <option value="">Select preference</option>
+        <option value="indian">Indian Cuisine</option>
+        <option value="mediterranean">Mediterranean</option>
+        <option value="asian">Asian Cuisine</option>
+        <option value="western">Western</option>
+        <option value="no-preference">No Preference</option>
+    </select>
+</div>
 
-                <!-- DIET TYPE ADDED (under Cultural/Dietary Preferences as requested) -->
-                <div class="form-group">
-                    <label for="diet-type">Diet Type</label>
-                    <select id="diet-type" class="form-control">
-                        <option value="">Select diet type</option>
-                        <option value="vegetarian">Vegetarian</option>
-                        <option value="vegan">Vegan</option>
-                        <option value="non-veg">Non-Veg</option>
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label for="workout-location">Preferred Workout Location</label>
-                    <select id="workout-location" class="form-control">
-                        <option value="">Select location</option>
-                        <option value="home">Home</option>
-                        <option value="gym">Gym</option>
-                        <option value="outdoor">Outdoor</option>
-                        <option value="both">Both Home & Gym</option>
-                    </select>
-                </div>
+<!-- FIXED: Diet Type (clean + perfect) -->
+<div class="form-group">
+    <label for="diet-type">Diet Type</label>
+    <select id="diet-type" class="form-control">
+        <option value="">Select diet type</option>
+        <option value="vegetarian">Vegetarian</option>
+        <option value="vegan">Vegan</option>
+        <option value="non-veg">Non-Veg</option>
+    </select>
+</div>
 
                 <button class="btn" onclick="generatePlans()">🚀 Generate My Personalized Plans</button>
             </div>
@@ -1018,41 +1016,57 @@
                     }
                 });
             }
+            // STRICT DIET FILTERING
+const meatKeywords = ['chicken', 'fish', 'salmon', 'tuna', 'turkey', 'beef', 'mutton', 'pork', 'shrimp', 'prawn', 'meat'];
+const dairyKeywords = ['milk', 'cheese', 'paneer', 'yogurt', 'curd', 'butter', 'ghee'];
+const eggKeywords = ['egg', 'omelet', 'scramble', 'boiled egg'];
+
+function containsAny(text, list) {
+    const lower = text.toLowerCase();
+    return list.some(w => lower.includes(w));
+}
+
+// Apply diet rules
+defaultMeals.forEach(meal => {
+    plan[meal] = plan[meal].filter(food => {
+        const f = food.toLowerCase();
+
+        if (userProfile.dietType === 'vegetarian') {
+            if (containsAny(f, meatKeywords)) return false;
+            if (containsAny(f, eggKeywords)) return false;
+        }
+
+        if (userProfile.dietType === 'vegan') {
+            if (containsAny(f, meatKeywords)) return false;
+            if (containsAny(f, eggKeywords)) return false;
+            if (containsAny(f, dairyKeywords)) return false;
+        }
+
+        return true; // non-veg keeps everything
+    });
+
+    // Auto-fill replacement options if list becomes empty
+    if (plan[meal].length === 0) {
+        if (userProfile.dietType === 'vegetarian') {
+            plan[meal] = [
+                'Paneer tikka with salad',
+                'Dal fry with rice',
+                'Vegetable khichdi',
+                'Tofu stir fry'
+            ];
+        }
+        if (userProfile.dietType === 'vegan') {
+            plan[meal] = [
+                'Tofu stir fry with veggies',
+                'Vegan dal with brown rice',
+                'Chickpea salad bowl',
+                'Quinoa vegetable bowl'
+            ];
+        }
+    }
+});
+
             
-            // DIET TYPE FILTERING (Vegetarian / Vegan / Non-Veg)
-            // Only apply to meal lists (breakfast/lunch/dinner/snacks)
-            const proteinMeatKeywords = ['chicken', 'fish', 'salmon', 'tuna', 'turkey', 'beef', 'meat', 'pork', 'shrimp', 'prawn'];
-            const dairyKeywords = ['milk', 'cheese', 'yogurt', 'paneer', 'cottage'];
-            const eggKeywords = ['egg', 'omelet', 'scramble', 'scrambled'];
-
-            function containsAny(text, keywords) {
-                const lower = text.toLowerCase();
-                return keywords.some(k => lower.includes(k));
-            }
-
-            if (userProfile.dietType === 'vegetarian') {
-                defaultMeals.forEach(meal => {
-                    plan[meal] = plan[meal].filter(item => {
-                        const lower = item.toLowerCase();
-                        // remove explicit meat/seafood keywords
-                        if (containsAny(lower, proteinMeatKeywords)) return false;
-                        return true;
-                    });
-                });
-            }
-
-            if (userProfile.dietType === 'vegan') {
-                defaultMeals.forEach(meal => {
-                    plan[meal] = plan[meal].filter(item => {
-                        const lower = item.toLowerCase();
-                        // remove meat/seafood, dairy, eggs
-                        if (containsAny(lower, proteinMeatKeywords)) return false;
-                        if (containsAny(lower, dairyKeywords)) return false;
-                        if (containsAny(lower, eggKeywords)) return false;
-                        return true;
-                    });
-                });
-            }
 
             // If a meal list becomes empty, try to add suitable vegetarian/vegan replacements
             // Vegetarian replacements
