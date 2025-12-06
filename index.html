@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>Personal Fitness & Wellness Planner</title>
     <style>
         * {
@@ -526,6 +526,17 @@
                     </select>
                 </div>
 
+                <!-- DIET TYPE ADDED (under Cultural/Dietary Preferences as requested) -->
+                <div class="form-group">
+                    <label for="diet-type">Diet Type</label>
+                    <select id="diet-type" class="form-control">
+                        <option value="">Select diet type</option>
+                        <option value="vegetarian">Vegetarian</option>
+                        <option value="vegan">Vegan</option>
+                        <option value="non-veg">Non-Veg</option>
+                    </select>
+                </div>
+
                 <div class="form-group">
                     <label for="workout-location">Preferred Workout Location</label>
                     <select id="workout-location" class="form-control">
@@ -699,7 +710,7 @@
             'muscle-gain': {
                 breakfast: [
                     'Protein pancakes with banana',
-                    'Scrambled eggs with whole grain toast',
+                    'Scrambled avacados with whole grain toast',
                     'Protein smoothie with oats and berries',
                     'Greek yogurt parfait with granola'
                 ],
@@ -710,7 +721,7 @@
                     'Salmon with sweet potato and green beans'
                 ],
                 dinner: [
-                    'Lean steak with baked potato',
+                    'Brown rice with baked potato',
                     'Grilled chicken thighs with rice',
                     'Fish with pasta and vegetables',
                     'Turkey chili with beans'
@@ -792,6 +803,7 @@
                 items.forEach(item => {
                     item.addEventListener('click', function() {
                         const checkbox = this.querySelector('input[type="checkbox"]');
+                        checkbox.checked = !checkbox.checked; // toggle checked state
                         const isNoneOption = checkbox.id.includes('none');
                         
                         if (isNoneOption && checkbox.checked) {
@@ -869,11 +881,16 @@
                 lifestyle: document.getElementById('lifestyle').value,
                 workoutLocation: document.getElementById('workout-location').value,
                 culturalPrefs: document.getElementById('cultural-prefs').value,
+                dietType: document.getElementById('diet-type').value, // <-- new
                 goals: Array.from(document.querySelectorAll('#goals-group input[type="checkbox"]:checked')).map(cb => cb.id.replace('goal-', '')),
                 conditions: Array.from(document.querySelectorAll('#conditions-group input[type="checkbox"]:checked')).map(cb => cb.id.replace('condition-', '')),
                 allergies: Array.from(document.querySelectorAll('#allergies-group input[type="checkbox"]:checked')).map(cb => cb.id.replace('allergy-', ''))
             };
             
+            // default none for allergies/conditions if empty
+            if (userProfile.allergies.length === 0) userProfile.allergies = ['none'];
+            if (userProfile.conditions.length === 0) userProfile.conditions = ['none'];
+
             // Calculate BMI
             const heightInMeters = userProfile.height / 100;
             userProfile.bmi = (userProfile.weight / (heightInMeters * heightInMeters)).toFixed(1);
@@ -940,7 +957,7 @@
             if (userProfile.conditions.includes('joint-issues') || userProfile.conditions.includes('back-problems')) {
                 Object.keys(weeklyPlan).forEach(day => {
                     weeklyPlan[day].exercises = weeklyPlan[day].exercises.map(exercise => {
-                        if (exercise.includes('jump') || exercise.includes('burpees')) {
+                        if (exercise.toLowerCase().includes('jump') || exercise.toLowerCase().includes('burpees')) {
                             return exercise.replace(/jump|burpees/gi, 'modified low-impact');
                         }
                         return exercise;
@@ -964,34 +981,173 @@
             }
             
             let plan = JSON.parse(JSON.stringify(basePlan)); // Deep copy
+
+            // Ensure meal keys exist
+            const defaultMeals = ['breakfast', 'lunch', 'dinner', 'snacks'];
+            defaultMeals.forEach(m => {
+                if (!plan[m]) plan[m] = [];
+            });
             
             // Modify based on cultural preferences
             if (userProfile.culturalPrefs && culturalModifications[userProfile.culturalPrefs]) {
                 const culturalPlan = culturalModifications[userProfile.culturalPrefs];
                 Object.keys(culturalPlan).forEach(meal => {
-                    plan[meal] = [...culturalPlan[meal], ...plan[meal].slice(2)];
+                    if (!plan[meal]) plan[meal] = [];
+                    // mix cultural options with base options (take first 2 cultural + existing)
+                    plan[meal] = [...culturalPlan[meal].slice(0, 2), ...plan[meal]];
                 });
             }
             
             // Remove items based on allergies
             if (!userProfile.allergies.includes('none')) {
                 Object.keys(plan).forEach(meal => {
+                    if (defaultMeals.includes(meal)) {
+                        plan[meal] = plan[meal].filter(item => {
+                            const lowerItem = item.toLowerCase();
+                            return !userProfile.allergies.some(allergy => {
+                                switch(allergy) {
+                                    case 'dairy': return lowerItem.includes('milk') || lowerItem.includes('cheese') || lowerItem.includes('yogurt') || lowerItem.includes('paneer') || lowerItem.includes('cottage');
+                                    case 'gluten': return lowerItem.includes('bread') || lowerItem.includes('pasta') || lowerItem.includes('wheat') || lowerItem.includes('roti') || lowerItem.includes('bhature');
+                                    case 'nuts': return lowerItem.includes('nut') || lowerItem.includes('almond') || lowerItem.includes('peanut');
+                                    case 'seafood': return lowerItem.includes('fish') || lowerItem.includes('salmon') || lowerItem.includes('tuna') || lowerItem.includes('prawn') || lowerItem.includes('shrimp');
+                                    case 'eggs': return lowerItem.includes('egg') || lowerItem.includes('omelet') || lowerItem.includes('scramble');
+                                    default: return false;
+                                }
+                            });
+                        });
+                    }
+                });
+            }
+            
+            // DIET TYPE FILTERING (Vegetarian / Vegan / Non-Veg)
+            // Only apply to meal lists (breakfast/lunch/dinner/snacks)
+            const proteinMeatKeywords = ['chicken', 'fish', 'salmon', 'tuna', 'turkey', 'beef', 'meat', 'pork', 'shrimp', 'prawn'];
+            const dairyKeywords = ['milk', 'cheese', 'yogurt', 'paneer', 'cottage'];
+            const eggKeywords = ['egg', 'omelet', 'scramble', 'scrambled'];
+
+            function containsAny(text, keywords) {
+                const lower = text.toLowerCase();
+                return keywords.some(k => lower.includes(k));
+            }
+
+            if (userProfile.dietType === 'vegetarian') {
+                defaultMeals.forEach(meal => {
+                    plan[meal] = plan[meal].filter(item => {
+                        const lower = item.toLowerCase();
+                        // remove explicit meat/seafood keywords
+                        if (containsAny(lower, proteinMeatKeywords)) return false;
+                        return true;
+                    });
+                });
+            }
+
+            if (userProfile.dietType === 'vegan') {
+                defaultMeals.forEach(meal => {
+                    plan[meal] = plan[meal].filter(item => {
+                        const lower = item.toLowerCase();
+                        // remove meat/seafood, dairy, eggs
+                        if (containsAny(lower, proteinMeatKeywords)) return false;
+                        if (containsAny(lower, dairyKeywords)) return false;
+                        if (containsAny(lower, eggKeywords)) return false;
+                        return true;
+                    });
+                });
+            }
+
+            // If a meal list becomes empty, try to add suitable vegetarian/vegan replacements
+            // Vegetarian replacements
+            const vegReplacements = {
+                breakfast: [
+                    'Paneer bhurji with whole wheat toast',
+                    'Greek yogurt (or plant-based yogurt) parfait with berries and oats',
+                    'Oatmeal with fruit and seeds'
+                ],
+                lunch: [
+                    'Chickpea salad bowl with mixed greens',
+                    'Paneer tikka with salad',
+                    'Quinoa & vegetable bowl'
+                ],
+                dinner: [
+                    'Palak paneer with brown rice',
+                    'Grilled tofu with mixed vegetables',
+                    'Vegetable and lentil curry with chapati'
+                ],
+                snacks: [
+                    'Roasted chickpeas',
+                    'Fruit with almond butter',
+                    'Veg sticks with hummus'
+                ]
+            };
+
+            const veganReplacements = {
+                breakfast: [
+                    'Tofu scramble with spinach and veggies',
+                    'Vegan smoothie with plant-based protein, banana and oats',
+                    'Chia pudding with almond milk and berries'
+                ],
+                lunch: [
+                    'Chickpea and quinoa salad',
+                    'Lentil curry with brown rice',
+                    'Vegan grain bowl with roasted vegetables'
+                ],
+                dinner: [
+                    'Vegan lentil dal with chapati',
+                    'Tofu stir-fry with brown rice',
+                    'Stuffed bell peppers with quinoa and veggies'
+                ],
+                snacks: [
+                    'Mixed nuts and dried fruit (if no nut allergy)',
+                    'Veg sticks with guacamole',
+                    'Roasted edamame'
+                ]
+            };
+
+            defaultMeals.forEach(meal => {
+                if (!plan[meal] || plan[meal].length === 0) {
+                    // If user chose vegetarian or vegan, add corresponding replacements
+                    if (userProfile.dietType === 'vegetarian') {
+                        plan[meal] = [...vegReplacements[meal]];
+                    } else if (userProfile.dietType === 'vegan') {
+                        plan[meal] = [...veganReplacements[meal]];
+                    } else {
+                        // Non-veg: add general healthy options if empty
+                        plan[meal] = plan[meal].concat([
+                            'Mixed vegetable bowl',
+                            'Lentil soup with salad',
+                            'Whole grain toast with avocado'
+                        ]);
+                    }
+                } else {
+                    // If there are some items but we want to ensure variety for vegetarian/vegan
+                    // append a replacement or two so user sees appropriate options
+                    if (userProfile.dietType === 'vegetarian') {
+                        // add vegetarian option if not present
+                        const add = vegReplacements[meal].find(x => !plan[meal].some(p => p.toLowerCase().includes(x.split(' ')[0].toLowerCase())));
+                        if (add) plan[meal].push(add);
+                    } else if (userProfile.dietType === 'vegan') {
+                        const add = veganReplacements[meal].find(x => !plan[meal].some(p => p.toLowerCase().includes(x.split(' ')[0].toLowerCase())));
+                        if (add) plan[meal].push(add);
+                    }
+                }
+
+                // After adding replacements, ensure allergy rules still apply — remove items conflicting with allergy
+                if (!userProfile.allergies.includes('none')) {
                     plan[meal] = plan[meal].filter(item => {
                         const lowerItem = item.toLowerCase();
                         return !userProfile.allergies.some(allergy => {
                             switch(allergy) {
-                                case 'dairy': return lowerItem.includes('milk') || lowerItem.includes('cheese') || lowerItem.includes('yogurt');
-                                case 'gluten': return lowerItem.includes('bread') || lowerItem.includes('pasta') || lowerItem.includes('wheat');
-                                case 'nuts': return lowerItem.includes('nut') || lowerItem.includes('almond');
-                                case 'seafood': return lowerItem.includes('fish') || lowerItem.includes('salmon') || lowerItem.includes('tuna');
-                                case 'eggs': return lowerItem.includes('egg') || lowerItem.includes('omelet');
+                                case 'dairy': return lowerItem.includes('milk') || lowerItem.includes('cheese') || lowerItem.includes('yogurt') || lowerItem.includes('paneer') || lowerItem.includes('cottage');
+                                case 'gluten': return lowerItem.includes('bread') || lowerItem.includes('pasta') || lowerItem.includes('wheat') || lowerItem.includes('roti') || lowerItem.includes('bhature');
+                                case 'nuts': return lowerItem.includes('nut') || lowerItem.includes('almond') || lowerItem.includes('peanut');
+                                case 'seafood': return lowerItem.includes('fish') || lowerItem.includes('salmon') || lowerItem.includes('tuna') || lowerItem.includes('prawn') || lowerItem.includes('shrimp');
+                                case 'eggs': return lowerItem.includes('egg') || lowerItem.includes('omelet') || lowerItem.includes('scramble');
                                 default: return false;
                             }
                         });
                     });
-                });
-            }
-            
+                }
+            });
+
             // Add supplements/recommendations based on goals
             plan.supplements = [];
             if (userProfile.goals.includes('muscle-gain')) {
@@ -1003,11 +1159,11 @@
             if (userProfile.gender === 'female') {
                 plan.supplements.push('Iron supplement (if needed)', 'Calcium with Vitamin D');
             }
-            
+
             // Hydration recommendations
             const baseWater = 35; // ml per kg body weight
             plan.hydration = `Drink ${Math.round(userProfile.weight * baseWater / 1000)} liters of water daily`;
-            
+
             return plan;
         }
 
@@ -1064,6 +1220,7 @@
             html += '<h3>🥗 Your Personalized Nutrition Plan</h3>';
             html += `<p><strong>Primary Goal:</strong> ${userProfile.goals[0] ? userProfile.goals[0].replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase()) : 'General Health'}</p>`;
             html += `<p><strong>Cultural Preference:</strong> ${userProfile.culturalPrefs || 'General'}</p>`;
+            html += `<p><strong>Diet Type:</strong> ${userProfile.dietType ? userProfile.dietType.charAt(0).toUpperCase() + userProfile.dietType.slice(1) : 'No Preference'}</p>`;
             html += `<p><strong>💧 ${nutritionPlan.hydration}</strong></p>`;
             html += '</div>';
             
@@ -1076,9 +1233,13 @@
                 html += `<div class="meal-card">`;
                 html += `<h4>${mealEmojis[meal]} ${meal.charAt(0).toUpperCase() + meal.slice(1)}</h4>`;
                 html += '<ul class="meal-options">';
-                nutritionPlan[meal].forEach(option => {
-                    html += `<li>${option}</li>`;
-                });
+                if (nutritionPlan[meal] && nutritionPlan[meal].length > 0) {
+                    nutritionPlan[meal].forEach(option => {
+                        html += `<li>${option}</li>`;
+                    });
+                } else {
+                    html += `<li>No suitable options found for ${meal}. Consider updating your diet or allergies.</li>`;
+                }
                 html += '</ul></div>';
             });
             
@@ -1102,7 +1263,14 @@
                 html += '<p>Always check food labels and inform restaurants about your allergies.</p>';
                 html += '</div>';
             }
-            
+
+            // Diet note
+            if (userProfile.dietType === 'vegetarian') {
+                html += '<div class="plan-section"><h3>🥕 Vegetarian Notes</h3><p>All animal meats and seafood have been removed. Vegetarian substitutes (paneer, tofu, lentils, legumes) were added when necessary.</p></div>';
+            } else if (userProfile.dietType === 'vegan') {
+                html += '<div class="plan-section"><h3>🌱 Vegan Notes</h3><p>All meats, seafood, eggs and dairy items have been removed. Plant-based protein options were added when necessary.</p></div>';
+            }
+
             content.innerHTML = html;
         }
 
@@ -1125,13 +1293,14 @@
             // BMI Status
             let bmiStatus = '';
             let bmiColor = '';
-            if (userProfile.bmi < 18.5) {
+            const numericBMI = parseFloat(userProfile.bmi);
+            if (numericBMI < 18.5) {
                 bmiStatus = 'Underweight';
                 bmiColor = '#ffc107';
-            } else if (userProfile.bmi < 25) {
+            } else if (numericBMI < 25) {
                 bmiStatus = 'Normal';
                 bmiColor = '#28a745';
-            } else if (userProfile.bmi < 30) {
+            } else if (numericBMI < 30) {
                 bmiStatus = 'Overweight';
                 bmiColor = '#fd7e14';
             } else {
